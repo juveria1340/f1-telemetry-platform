@@ -1,0 +1,36 @@
+groups:
+  - name: f1-api
+    rules:
+      - alert: F1ApiDown
+        expr: up{job="f1-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: F1 API is not being scraped
+
+      - alert: F1DatabaseDown
+        expr: f1_db_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: F1 API cannot reach PostgreSQL
+
+      - alert: F1HighErrorRate
+        expr: |
+          sum(rate(f1_http_requests_total{status=~"5.."}[5m]))
+            / clamp_min(sum(rate(f1_http_requests_total[5m])), 1e-9) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 5% of API requests are failing
+
+      - alert: F1CriticalTelemetryAlertsOpen
+        expr: f1_open_alerts{severity="critical"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Unacknowledged critical telemetry alerts

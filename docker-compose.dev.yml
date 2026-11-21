@@ -1,0 +1,8 @@
+# Local development override: live-reload with the source mounted.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+services:
+  api:
+    volumes:
+      - ./app:/app/app
+      - ./collector:/app/collector
+    command: ["uvicorn", "app.main:app", "--host=0.0.0.0", "--port=8000", "--reload"]

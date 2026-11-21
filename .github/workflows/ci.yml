@@ -121,7 +121,9 @@ jobs:
       - name: Prometheus scrapes the API
         run: |
           for i in $(seq 1 20); do
-            if curl -fsS 'localhost:9090/api/v1/query?query=up{job="f1-api"}' | grep -q '"1"\]'; then
+            # -G + --data-urlencode: PromQL's { } " must be URL-encoded or Prometheus returns 400
+            if curl -fsS -G --data-urlencode 'query=up{job="f1-api"}' localhost:9090/api/v1/query \
+                | grep -q '"1"\]'; then
               echo "scrape OK"; exit 0
             fi
             sleep 3
